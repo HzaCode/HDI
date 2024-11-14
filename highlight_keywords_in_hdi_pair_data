@@ -1,0 +1,53 @@
+Sub ReplaceKeywordsInKColumn()
+    Dim ws As Worksheet
+    Dim cell As Range
+    Dim searchText As Variant
+    Dim keyword As Variant ' Changed from String to Variant
+    Dim startPos As Integer
+    Dim lengthText As Integer
+    Dim conclusionCol As Range
+
+    ' Set the array of keywords to search for
+    searchText = Array("combined", )
+
+    ' Specify the worksheet name
+    On Error Resume Next
+    Set ws = ThisWorkbook.Sheets("Sorted_Sheet3_Filtered_No_Combi")
+    On Error GoTo 0
+
+    If ws Is Nothing Then
+        MsgBox "Cannot find worksheet: Sorted_Sheet3_Filtered_No_Combi, please check the name!"
+        Exit Sub
+    End If
+
+    ' Get the range of column K
+    Set conclusionCol = ws.Range("K2:K" & ws.Cells(ws.Rows.Count, "K").End(xlUp).Row)
+
+    ' Check if there is any valid data in column K
+    If conclusionCol Is Nothing Then
+        MsgBox "No valid data found in column K!"
+        Exit Sub
+    End If
+
+    ' Iterate through all cells in column K
+    For Each cell In conclusionCol
+        If Not IsEmpty(cell.Value) Then
+            For Each keyword In searchText
+                startPos = 1
+                Do While startPos > 0
+                    startPos = InStr(startPos, cell.Value, keyword)
+                    If startPos > 0 Then
+                        lengthText = Len(keyword)
+                        ' Change the found text color to red
+                        cell.Characters(startPos, lengthText).Font.Color = RGB(255, 0, 0)
+                        ' Move starting point to find the next occurrence of the keyword
+                        startPos = startPos + lengthText
+                    End If
+                Loop
+            Next keyword
+        End If
+    Next cell
+
+    MsgBox "All specified keywords in column K have been successfully highlighted in red!"
+
+End Sub
