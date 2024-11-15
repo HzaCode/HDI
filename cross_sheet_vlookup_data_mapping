@@ -1,0 +1,50 @@
+Sub CopyColumnsHIFromSheet11()
+    Dim wsSource As Worksheet
+    Dim wsTarget As Worksheet
+    Dim lastRowSource As Long
+    Dim lastRowTarget As Long
+    Dim sourceIDRange As Range
+    Dim targetIDRange As Range
+    Dim sourceIDDict As Object
+    Dim i As Long
+    Dim id As Variant
+    
+    ' Set the worksheets
+    Set wsSource = ThisWorkbook.Sheets("Sheet11")
+    Set wsTarget = ThisWorkbook.Sheets("Sorted_Sheet3_Filtered_No_Combi")
+    
+    ' Find the last row in the source and target sheets for column D (IDs)
+    lastRowSource = wsSource.Cells(wsSource.Rows.Count, "D").End(xlUp).Row
+    lastRowTarget = wsTarget.Cells(wsTarget.Rows.Count, "D").End(xlUp).Row
+    
+    ' Set the ranges for IDs in both sheets
+    Set sourceIDRange = wsSource.Range("D2:D" & lastRowSource)
+    Set targetIDRange = wsTarget.Range("D2:D" & lastRowTarget)
+    
+    ' Create a dictionary to store IDs and their corresponding H and I values from the source sheet
+    Set sourceIDDict = CreateObject("Scripting.Dictionary")
+    
+    ' Loop through the source IDs and store H and I values in the dictionary
+    For i = 2 To lastRowSource
+        id = wsSource.Cells(i, "D").Value
+        If Not sourceIDDict.Exists(id) Then
+            sourceIDDict.Add id, Array(wsSource.Cells(i, "H").Value, wsSource.Cells(i, "I").Value)
+        End If
+    Next i
+    
+    ' Loop through the target IDs and fill in H and I values if the ID exists in the source dictionary
+    For i = 2 To lastRowTarget
+        id = wsTarget.Cells(i, "D").Value
+        If sourceIDDict.Exists(id) Then
+            wsTarget.Cells(i, "H").Value = sourceIDDict(id)(0) ' Copy H value
+            wsTarget.Cells(i, "I").Value = sourceIDDict(id)(1) ' Copy I value
+        End If
+    Next i
+    
+    ' Clean up
+    Set sourceIDDict = Nothing
+    Set sourceIDRange = Nothing
+    Set targetIDRange = Nothing
+    Set wsSource = Nothing
+    Set wsTarget = Nothing
+End Sub
